@@ -1,30 +1,41 @@
 import React from "react";
-import renderer from "react-test-renderer";
+import { shallow } from "enzyme";
 import Counter from "./Counter";
 
 describe("Counter", () => {
   let component = null;
+  const mockIncrease = jest.fn();
+  const mockDecrease = jest.fn();
 
   it("renders correctly", () => {
-    component = renderer.create(<Counter />);
+    component = shallow(
+      <Counter
+        value={700}
+        onIncrease={mockIncrease}
+        onDecrease={mockDecrease}
+      />
+    );
   });
 
   it("matches snapshot", () => {
-    const tree = component.toJSON();
-    expect(tree).toMatchSnapshot();
+    expect(component).toMatchSnapshot();
   });
 
-  it("increases correctly", () => {
-    component.getInstance().onIncrease();
-    expect(component.getInstance().state.value).toBe(2); // value = 2?
-    const tree = component.toJSON(); // re-render
-    expect(tree).toMatchSnapshot(); // compare with snapshot
+  it("is 700", () => {
+    expect(
+      component
+        .find("h2")
+        .at(0)
+        .text(),
+      "700"
+    );
   });
 
-  it("decreases correctly", () => {
-    component.getInstance().onDecrease();
-    expect(component.getInstance().state.value).toBe(1); // value = 1?
-    const tree = component.toJSON(); // re-render
-    expect(tree).toMatchSnapshot(); // compare with snapshot
+  it("calls functions", () => {
+    const buttons = component.find("button");
+    buttons.at(0).simulate("click");
+    buttons.at(1).simulate("click");
+    expect(mockIncrease.mock.calls.length).toBe(1);
+    expect(mockDecrease.mock.calls.length).toBe(1);
   });
 });

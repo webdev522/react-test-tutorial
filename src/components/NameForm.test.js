@@ -4,45 +4,35 @@ import NameForm from "./NameForm";
 
 describe("NameForm", () => {
   let component = null;
-
-  let changed = null;
-  const onInsert = name => {
-    changed = name;
-  };
+  const mockChange = jest.fn();
+  const mockSubmit = jest.fn();
 
   it("renders correctly", () => {
-    component = shallow(<NameForm onInsert={onInsert} />);
+    component = shallow(
+      <NameForm onChange={mockChange} onSubmit={mockSubmit} value="hello" />
+    );
   });
 
   it("matches snapshot", () => {
-    // const tree = component.toJSON();
     expect(component).toMatchSnapshot();
   });
 
-  describe("insert new text", () => {
-    it("has a form", () => {
-      expect(component.find("form").exists()).toBe(true);
-    });
-    it("has an input", () => {
-      expect(component.find("input").exists()).toBe(true);
-    });
-    it("simulates input change", () => {
-      const mockedEvent = {
-        target: {
-          value: "hello"
-        }
-      };
-      // simulate event. the second param is an event obj
-      component.find("input").simulate("change", mockedEvent);
-      expect(component.state().name).toBe("hello");
-    });
-    it("simulates form submit", () => {
-      const mockedEvent = {
-        preventDefault: () => null
-      };
-      component.find("form").simulate("submit", mockedEvent);
-      expect(component.state().name).toBe("");
-      expect(changed).toBe("hello");
-    });
+  it("shows valid input value", () => {
+    expect(component.find("input").props().value).toBe("hello");
+  });
+
+  it("calls onChange", () => {
+    const mockedEvent = {
+      target: {
+        value: "world"
+      }
+    };
+    component.find("input").simulate("change", mockedEvent);
+    expect(mockChange.mock.calls.length).toBe(1);
+  });
+
+  it("calls onSubmit", () => {
+    component.find("form").simulate("submit");
+    expect(mockSubmit.mock.calls.length).toBe(1);
   });
 });
